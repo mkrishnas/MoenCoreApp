@@ -1,65 +1,66 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Operations;
-using DTOModels;
-using Operations.IOperations;
-using Microsoft.Extensions.Logging;
-
-namespace API.Controllers
+﻿namespace API.Controllers
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Threading.Tasks;
+    using DTOModels;
+    using Microsoft.AspNetCore.Http;
+    using Microsoft.AspNetCore.Mvc;
+    using Microsoft.Extensions.Logging;
+    using Operations;
+    using Operations.IOperations;
+
     [ApiController]
-    [Route("api/[controller]")]    
+    [Route("api/[controller]")]
     public class SupplierController : ControllerBase
     {
-        private readonly ISupplierOperations _supplierOperations;
+        private readonly ISupplierOperations supplierOperations;
 
-        private readonly ILogger<SupplierController> _logger;
-        public SupplierController(ISupplierOperations supplierOperations, ILogger<SupplierController> logger) : base(logger)
+        private readonly ILogger<SupplierController> logger;
+
+        public SupplierController(ISupplierOperations supplierOperations, ILogger<SupplierController> logger)
+            : base(logger)
         {
-            _logger = logger;
-            _supplierOperations = supplierOperations;
+            this.logger = logger;
+            this.supplierOperations = supplierOperations;
         }
 
         [HttpGet("[action]")]
         public List<SupplierDTO> Get()
         {
-            return _supplierOperations.GetAllSuppliers();
+            return this.supplierOperations.GetAllSuppliers();
         }
 
         [HttpGet("[action]")]
         public List<SupplierInfoDTO> GetAllSupplierInfo()
         {
-            return _supplierOperations.GetAllSuppliersInfo();
+            return this.supplierOperations.GetAllSuppliersInfo();
         }
 
         [HttpGet("[action]")]
         public async Task<ApiResponse> GetSupplierById(int supplierId)
         {
-            var respData = await _supplierOperations.GetSupplier(supplierId);
-            return CreateResponse(respData);
-            //return await _supplierOperations.GetSupplier(supplierId);
+            var respData = await this.supplierOperations.GetSupplier(supplierId);
+            return this.CreateResponse(respData);
         }
 
         [HttpGet("[action]")]
         public async Task CreateSupplier(string name)
         {
-            await _supplierOperations.AddSupplier(name);
+            await this.supplierOperations.AddSupplier(name);
         }
 
         [HttpGet("[action]")]
         public async Task UpdateSupplier(string name)
         {
-            await _supplierOperations.UpdateSupplier(name);
+            await this.supplierOperations.UpdateSupplier(name);
         }
 
         [HttpGet("[action]")]
-        public async Task RemoveSupplier(int Id)
+        public async Task RemoveSupplier(int id)
         {
-            await _supplierOperations.RemoveSupplier(Id);
+            await this.supplierOperations.RemoveSupplier(id);
         }
     }
 }

@@ -26,7 +26,7 @@ namespace DTOModels
         //public string Version { get; set; }
 
         [JsonPropertyName("RequestInfo")]
-        public ICollection<PCMRequestInfoDTO> PCMRequestInfoList { get; set; }
+        public ICollection<PCMRequestInfoDTO> PCMRequestInfo { get; set; }
     }
 
     public class PCMRequestDetails1DTO

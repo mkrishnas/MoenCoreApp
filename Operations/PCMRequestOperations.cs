@@ -25,7 +25,7 @@ namespace Operations
         {
             List<PCMRequestDetailsDTO> pcmRequestDetailsDTO = new List<PCMRequestDetailsDTO>();
             pcmRequestDetailsDTO = _pcmRequestRepository.GetAllPCMRequestInfo(userId);
-            //var orgDTO = _mapper.Map<List<PCMRequestDetailsDTO>>(result);
+
             return pcmRequestDetailsDTO;
         }
 
@@ -33,29 +33,30 @@ namespace Operations
         {
             List<PCMRequestDetailsDTO> pcmRequestDetailsDTO = new List<PCMRequestDetailsDTO>();
             var result = await _pcmRequestRepository.GetPCMRequestByProjectName(ProjectName);
+            pcmRequestDetailsDTO = _mapper.Map<List<PCMRequestDetailsDTO>>(result);
 
-            foreach (var reqItem in result)
-            {
-                var reqdto = new PCMRequestDetailsDTO
-                {
-                    Id = reqItem.Id,
-                    ProjectName = reqItem.ProjectName,
-                    Status = reqItem.Status
-                };
-                List<PCMRequestInfoDTO> requestInfoList = new List<PCMRequestInfoDTO>();
-                foreach (var reqinfoItem in reqItem.PcmrequestInfo)
-                {
-                    var reqinfodto = new PCMRequestInfoDTO
-                    {
-                        Quantity = reqinfoItem.Quantity,
-                        ProductId = reqinfoItem.Product.Id,
-                        ProductName = reqinfoItem.Product.Name,
-                    };
-                    requestInfoList.Add(reqinfodto);
-                }
-                reqdto.PCMRequestInfoList = requestInfoList;
-                pcmRequestDetailsDTO.Add(reqdto);
-            }
+            //foreach (var reqItem in result)
+            //{
+            //    var reqdto = new PCMRequestDetailsDTO
+            //    {
+            //        Id = reqItem.Id,
+            //        ProjectName = reqItem.ProjectName,
+            //        Status = reqItem.Status
+            //    };
+            //    List<PCMRequestInfoDTO> requestInfoList = new List<PCMRequestInfoDTO>();
+            //    foreach (var reqinfoItem in reqItem.PcmrequestInfo)
+            //    {
+            //        var reqinfodto = new PCMRequestInfoDTO
+            //        {
+            //            Quantity = reqinfoItem.Quantity,
+            //            ProductId = reqinfoItem.Product.Id,
+            //            ProductName = reqinfoItem.Product.Name,
+            //        };
+            //        requestInfoList.Add(reqinfodto);
+            //    }
+            //    reqdto.PCMRequestInfoList = requestInfoList;
+            //    pcmRequestDetailsDTO.Add(reqdto);
+            //}
             return pcmRequestDetailsDTO;
         }
     }

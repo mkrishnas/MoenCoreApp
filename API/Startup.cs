@@ -1,61 +1,79 @@
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Models.Models;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Identity;
-using Operations.IOperations;
-using Operations;
-using Repository.IRepository;
-using Repository;
-using Microsoft.AspNetCore.Diagnostics;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.HttpsPolicy;
-//using Microsoft.AspNetCore.SpaServices.AngularCli;
-using System.Net;
-using AutoMapper;
-using Common;
-using Microsoft.OpenApi.Models;
-using Microsoft.Extensions.Logging;
-using NLog.Extensions.Logging;
+// <copyright file="Startup.cs" company="Yash Technologies Pvt Ltd.">
+// Copyright (c) Yash Technologies Pvt Ltd.. All rights reserved.
+// </copyright>
 
 namespace API
 {
+    using System;
+    using System.Collections.Generic;
+    using System.IO;
+    using System.Linq;
+    using System.Net;
+    using System.Threading.Tasks;
+    using API.Logging;
+    using AutoMapper;
+    using Common;
+    using Microsoft.AspNetCore.Builder;
+    using Microsoft.AspNetCore.Diagnostics;
+    using Microsoft.AspNetCore.Hosting;
+    using Microsoft.AspNetCore.Http;
+    using Microsoft.AspNetCore.HttpsPolicy;
+    using Microsoft.AspNetCore.Identity;
+    using Microsoft.AspNetCore.Mvc;
+    using Microsoft.EntityFrameworkCore;
+    using Microsoft.Extensions.Configuration;
+    using Microsoft.Extensions.DependencyInjection;
+    using Microsoft.Extensions.Hosting;
+    using Microsoft.Extensions.Logging;
+    using Microsoft.OpenApi.Models;
+    using Models.Models;
+    using NLog;
+    using NLog.Extensions.Logging;
+    using Operations;
+    using Operations.IOperations;
+    using Repository;
+    using Repository.IRepository;
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="Startup"/> class.
+    /// </summary>
+    /// <param name="configuration">Start Up.</param>
     public class Startup
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Startup"/> class.
+        /// </summary>
+        /// <param name="configuration">Start Up.</param>
         public Startup(IConfiguration configuration)
         {
-            Configuration = configuration;
+            LogManager.LoadConfiguration(string.Concat(Directory.GetCurrentDirectory(), "/nlog.config"));
+            this.Configuration = configuration;
         }
 
         public IConfiguration Configuration { get; }
 
-        // This method gets called by the runtime. Use this method to add services to the container.
+        /// <summary>
+        /// Configure Services
+        /// </summary>
+        /// <param name="services"></param>
         public void ConfigureServices(IServiceCollection services)
         {
+            services.ConfigureLoggerService();
             services.AddControllers();
             services.AddLogging((config) =>
             {
                 config.AddNLog();
             });
-            services.AddDbContext<MOENPCMContext>(options => options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
-            //services.AddDbContextPool<MOENPCMContext>(options => options.UseSqlServer(Configuration.GetConnectionString("OnlineBillingConnection")));
-            //.AddEntityFrameworkStores<MOENPCMContext>();
+
+            services.AddDbContext<MOENPCMContext>(options => options.UseSqlServer(this.Configuration.GetConnectionString("DefaultConnection")));
+            services.AddScoped<GlobalExceptionFilter>();
+            services.AddScoped<GlobalExceptionHandler>();
             services.AddScoped<ISupplierOperations, SupplierOperations>();
             services.AddScoped<ISupplierRepository, SupplierRepository>();
             services.AddScoped<IPCMRequestOperations, PCMRequestOperations>();
             services.AddScoped<IPCMRequestRepository, PCMRequestRepository>();
             services.AddScoped<IProductMetadataOperations, ProductMetadataOperations>();
             services.AddScoped<IProductMetadataRepository, ProductMetadataRepository>();
-            //services.AddAutoMapper(typeof(Startup));
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
             services.AddSwaggerGen(c =>
             {
@@ -69,7 +87,10 @@ namespace API
             services.AddSingleton(mapperConfig.CreateMapper());
         }
 
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
+        /// <summary>This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
+        /// </summary>
+        /// <param name="app">app.</param>
+        /// <param name="env">env.</param>
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             if (env.IsDevelopment())
@@ -80,8 +101,6 @@ namespace API
             }
 
             app.UseRouting();
-
-            //app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
             {

@@ -14,6 +14,8 @@ namespace Common
         {
             CreateMap<Supplier, SupplierDTO>();
             CreateMap<Pcmrequest, PCMRequestDTO>();
+            CreateMap<Pcmrequest, PCMRequestDetailsDTO>();
+            CreateMap<PcmrequestInfo, PCMRequestInfoDTO>();
         }
     }
 }
