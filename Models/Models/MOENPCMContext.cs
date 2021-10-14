@@ -1,11 +1,12 @@
 ﻿using System;
 using DTOModels;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
 
 namespace Models.Models
 {
-    public partial class MOENPCMContext : DbContext
+    public partial class MOENPCMContext : IdentityDbContext<User>
     {
         public MOENPCMContext()
         {
@@ -30,6 +31,7 @@ namespace Models.Models
         public virtual DbSet<SupplierProduct> SupplierProduct { get; set; }
         public virtual DbSet<UserDetails> UserDetails { get; set; } //
         public virtual DbSet<ProductMetaDataDTO> ProductMetaDataDTOs { get; set; }
+        public virtual DbSet<User> Users { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -42,6 +44,8 @@ namespace Models.Models
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            base.OnModelCreating(modelBuilder);
+
             modelBuilder.Entity<GroupDetails>(entity =>
             {
                 entity.Property(e => e.EmailId).IsUnicode(false);
@@ -220,6 +224,12 @@ namespace Models.Models
                     .WithMany(p => p.UserDetails)
                     .HasForeignKey(d => d.GroupId)
                     .HasConstraintName("FK__UserDetai__Group__5441852A");
+            });
+
+            modelBuilder.Entity<User>(entity =>
+            {
+                // Primary key
+                entity.HasKey(u => u.Id);
             });
 
             OnModelCreatingPartial(modelBuilder);

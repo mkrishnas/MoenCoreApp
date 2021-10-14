@@ -33,6 +33,9 @@ namespace API
     using Operations.IOperations;
     using Repository;
     using Repository.IRepository;
+    using Microsoft.AspNetCore.Authentication.JwtBearer;
+    using Microsoft.IdentityModel.Tokens;
+    using System.Text;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="Startup"/> class.
@@ -65,7 +68,47 @@ namespace API
                 config.AddNLog();
             });
 
-            services.AddDbContext<MOENPCMContext>(options => options.UseSqlServer(this.Configuration.GetConnectionString("DefaultConnection")));
+            //services.AddDbContext<MOENPCMContext>(options => options.UseSqlServer(this.Configuration.GetConnectionString("DefaultConnection")));
+
+            services.AddDbContext<MOENPCMContext>(options =>
+              options.UseSqlServer(
+                  Configuration.GetConnectionString("DefaultConnection")));
+
+            services.AddIdentity<User, IdentityRole>().AddDefaultTokenProviders()
+                .AddEntityFrameworkStores<MOENPCMContext>();
+            services.AddCors(options => options.AddPolicy("CorsPolicy",
+               builder =>
+               {
+                   builder.AllowAnyMethod().AllowAnyHeader()
+                          .WithOrigins(
+                              "http://localhost:4738")
+                          .AllowCredentials();
+               }));
+
+            // Adding Authentication  
+            services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
+
+            // Adding Jwt Bearer  
+            .AddJwtBearer(options =>
+            {
+                options.SaveToken = true;
+                options.RequireHttpsMetadata = false;
+                options.TokenValidationParameters = new TokenValidationParameters()
+                {
+                    ValidateIssuer = true,
+                    ValidateAudience = true,
+                    ValidAudience = Configuration["JWT:ValidAudience"],
+                    ValidIssuer = Configuration["JWT:ValidIssuer"],
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["JWT:Secret"]))
+                };
+            });
+
+
             services.AddScoped<GlobalExceptionFilter>();
             services.AddScoped<GlobalExceptionHandler>();
             services.AddScoped<ISupplierOperations, SupplierOperations>();
@@ -74,10 +117,37 @@ namespace API
             services.AddScoped<IPCMRequestRepository, PCMRequestRepository>();
             services.AddScoped<IProductMetadataOperations, ProductMetadataOperations>();
             services.AddScoped<IProductMetadataRepository, ProductMetadataRepository>();
+            services.AddScoped<IUserOperations, UserOperations>();
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "API", Version = "v1" });
+
+                // To Enable authorization using Swagger (JWT)    
+                c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme()
+                {
+                    Name = "Authorization",
+                    Type = SecuritySchemeType.ApiKey,
+                    Scheme = "Bearer",
+                    BearerFormat = "JWT",
+                    In = ParameterLocation.Header,
+                    Description = "Enter 'Bearer' [space] and then your valid token in the text input below.\r\n\r\nExample: \"Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9\"",
+                });
+                c.AddSecurityRequirement(new OpenApiSecurityRequirement
+                {
+                    {
+                          new OpenApiSecurityScheme
+                            {
+                                Reference = new OpenApiReference
+                                {
+                                    Type = ReferenceType.SecurityScheme,
+                                    Id = "Bearer"
+                                }
+                            },
+                            new string[] {}
+
+                    }
+                });
             });
 
             var mapperConfig = new MapperConfiguration(cfg =>
@@ -101,6 +171,10 @@ namespace API
             }
 
             app.UseRouting();
+
+            app.UseAuthentication();
+            app.UseAuthorization();
+            app.UseCors("CorsPolicy");
 
             app.UseEndpoints(endpoints =>
             {

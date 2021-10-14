@@ -8,6 +8,7 @@
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.Extensions.Logging;
 
+    [Authorize]
     [ApiController]
     public class ControllerBase : Microsoft.AspNetCore.Mvc.ControllerBase
     {
