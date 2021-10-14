@@ -34,6 +34,7 @@ namespace Operations
             List<PCMRequestDetailsDTO> pcmRequestDetailsDTO = new List<PCMRequestDetailsDTO>();
             var result = await _pcmRequestRepository.GetPCMRequestByProjectName(ProjectName);
             pcmRequestDetailsDTO = _mapper.Map<List<PCMRequestDetailsDTO>>(result);
+            
             return pcmRequestDetailsDTO;
         }
     }
