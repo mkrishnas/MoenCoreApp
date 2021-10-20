@@ -12,19 +12,20 @@ namespace Operations
     public class PCMRequestOperations : IPCMRequestOperations
     {
         private readonly IMapper _mapper;
-        private readonly IPCMRequestRepository _pcmRequestRepository;
+        private readonly IUnitOfWork _unitOfWork;
         List<PCMRequestDTO> pcmRequestDTO = new List<PCMRequestDTO>();
+        
 
-        public PCMRequestOperations(IPCMRequestRepository pcmRequestRepository, IMapper mapper)
+        public PCMRequestOperations(IMapper mapper, IUnitOfWork unitOfWork)
         {
-            _pcmRequestRepository = pcmRequestRepository;
             _mapper = mapper;
+            _unitOfWork = unitOfWork;
         }
 
         public List<PCMRequestDetailsDTO> GetAllPCMRequestInfo(string userId)
         {
             List<PCMRequestDetailsDTO> pcmRequestDetailsDTO = new List<PCMRequestDetailsDTO>();
-            pcmRequestDetailsDTO = _pcmRequestRepository.GetAllPCMRequestInfo(userId);
+            pcmRequestDetailsDTO = _unitOfWork.PCMRequest.GetAllPCMRequestInfo(userId);
 
             return pcmRequestDetailsDTO;
         }
@@ -32,7 +33,7 @@ namespace Operations
         public async Task<List<PCMRequestDetailsDTO>> GetPCMRequestByProjectName(string ProjectName)
         {
             List<PCMRequestDetailsDTO> pcmRequestDetailsDTO = new List<PCMRequestDetailsDTO>();
-            var result = await _pcmRequestRepository.GetPCMRequestByProjectName(ProjectName);
+            var result = await _unitOfWork.PCMRequest.GetPCMRequestByProjectName(ProjectName);
             pcmRequestDetailsDTO = _mapper.Map<List<PCMRequestDetailsDTO>>(result);
             
             return pcmRequestDetailsDTO;

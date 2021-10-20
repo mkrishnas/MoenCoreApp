@@ -112,12 +112,10 @@ namespace API
             services.AddScoped<GlobalExceptionFilter>();
             services.AddScoped<GlobalExceptionHandler>();
             services.AddScoped<ISupplierOperations, SupplierOperations>();
-            services.AddScoped<ISupplierRepository, SupplierRepository>();
             services.AddScoped<IPCMRequestOperations, PCMRequestOperations>();
-            services.AddScoped<IPCMRequestRepository, PCMRequestRepository>();
             services.AddScoped<IProductMetadataOperations, ProductMetadataOperations>();
-            services.AddScoped<IProductMetadataRepository, ProductMetadataRepository>();
             services.AddScoped<IUserOperations, UserOperations>();
+            services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
             services.AddSwaggerGen(c =>
             {

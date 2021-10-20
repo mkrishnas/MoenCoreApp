@@ -13,25 +13,25 @@ namespace Operations
     public class SupplierOperations : ISupplierOperations
     {
         private readonly IMapper _mapper;
-        private readonly ISupplierRepository _supplierRepository;
+        private readonly IUnitOfWork _unitOfWork;
         List<SupplierDTO> supplierDTO = new List<SupplierDTO>();
 
-        public SupplierOperations(ISupplierRepository supplierRepository, IMapper mapper)
+        public SupplierOperations(IMapper mapper, IUnitOfWork unitOfWork)
         {
-            _supplierRepository = supplierRepository;
             _mapper = mapper;
+            _unitOfWork = unitOfWork;
         }
 
         public List<SupplierDTO> GetAllSuppliers()
         {
-            var result = _supplierRepository.GetAllSuppliers();
+            var result = _unitOfWork.Supplier.GetAllSuppliers();
             var orgDTO = _mapper.Map<List<SupplierDTO>>(result);
             return orgDTO;
         }
 
         public async Task<SupplierDTO> GetSupplier(int supplierId)
         {            
-            var result = await _supplierRepository.GetAsync(supplierId);
+            var result = await _unitOfWork.Supplier.GetAsync(supplierId);
             var orgDTO = _mapper.Map<SupplierDTO>(result);
             return orgDTO;
         }
@@ -40,7 +40,7 @@ namespace Operations
         {
             List<SupplierInfoDTO> lst = new List<SupplierInfoDTO>();
             
-            var result = _supplierRepository.GetAllSuppliersInfo();
+            var result = _unitOfWork.Supplier.GetAllSuppliersInfo();
 
             
             List<SupplierInfoDTO> lstObjSupplierInfoDTO = new List<SupplierInfoDTO>();
@@ -72,20 +72,20 @@ namespace Operations
             Supplier supplier = new Supplier();
             supplier.Name = name;
             //supplier.Id = 9;
-            await _supplierRepository.AddAsync(supplier);
+            await _unitOfWork.Supplier.AddAsync(supplier);
         }
 
         public async Task UpdateSupplier(string name)
         {
-            Supplier supplier = await _supplierRepository.GetAsync(7);
+            Supplier supplier = await _unitOfWork.Supplier.GetAsync(7);
             supplier.Name = name;
-            await _supplierRepository.Update(supplier);
+            await _unitOfWork.Supplier.Update(supplier);
         }
 
         public async Task RemoveSupplier(int Id)
         {
-            Supplier supplier = await _supplierRepository.GetAsync(Id);
-            await _supplierRepository.RemoveAsync(supplier);
+            Supplier supplier = await _unitOfWork.Supplier.GetAsync(Id);
+            await _unitOfWork.Supplier.RemoveAsync(supplier);
         }
     }
 }
