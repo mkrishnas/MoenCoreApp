@@ -13,5 +13,7 @@ namespace Repository.IRepository
 
         IPCMRequestRepository PCMRequest { get; }
 
+        IEmailQueueRepository EmailQueue { get; }
+
     }
 }

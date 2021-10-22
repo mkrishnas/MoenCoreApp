@@ -20,5 +20,7 @@ namespace Operations.IOperations
 
         Task RemoveSupplier(int Id);
 
+        Task SendCostEmailToSupplier(int supplierId);
+
     }
 }

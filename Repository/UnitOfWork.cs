@@ -17,6 +17,7 @@ namespace Repository
             Supplier = new SupplierRepository(_db);
             ProductMetadata = new ProductMetadataRepository(_db);
             PCMRequest = new PCMRequestRepository(_db);
+            EmailQueue = new EmailQueueRepository(_db);
         }
 
         public ISupplierRepository Supplier { get; private set; }
@@ -24,6 +25,8 @@ namespace Repository
         public IProductMetadataRepository ProductMetadata { get; private set; }
 
         public IPCMRequestRepository PCMRequest { get; private set; }
+
+        public IEmailQueueRepository EmailQueue { get; private set; }
 
         public void Dispose()
         {

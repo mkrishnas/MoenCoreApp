@@ -62,5 +62,11 @@
         {
             await this.supplierOperations.RemoveSupplier(id);
         }
+
+        [HttpGet("[action]")]
+        public async Task SendEmail(int supplierId)
+        {
+            await this.supplierOperations.SendCostEmailToSupplier(supplierId);
+        }
     }
 }

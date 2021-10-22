@@ -7,6 +7,8 @@ using Repository.IRepository;
 using AutoMapper;
 using System.Threading.Tasks;
 using Models.Models;
+using Microsoft.AspNetCore.Identity;
+using Common;
 
 namespace Operations
 {
@@ -15,11 +17,12 @@ namespace Operations
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _unitOfWork;
         List<SupplierDTO> supplierDTO = new List<SupplierDTO>();
-
-        public SupplierOperations(IMapper mapper, IUnitOfWork unitOfWork)
+        private readonly UserManager<User> _userManager;
+        public SupplierOperations(IMapper mapper, IUnitOfWork unitOfWork, UserManager<User> userManager)
         {
             _mapper = mapper;
             _unitOfWork = unitOfWork;
+            _userManager = userManager;
         }
 
         public List<SupplierDTO> GetAllSuppliers()
@@ -86,6 +89,56 @@ namespace Operations
         {
             Supplier supplier = await _unitOfWork.Supplier.GetAsync(Id);
             await _unitOfWork.Supplier.RemoveAsync(supplier);
+        }
+
+        public async Task SendCostEmailToSupplier(int supplierId)
+        {
+            EmailQueue entity = new EmailQueue();
+            try
+            {
+                var result = await _unitOfWork.Supplier.GetAsync(supplierId);
+                var emailTemplate = await _unitOfWork.EmailQueue.GetEmailTemplateByType(EmailType.CostNotificationToSupplier);
+                var emailHeaderFooter = await _unitOfWork.EmailQueue.GetEmailHeaderFooter();
+                var emailSetting = await _unitOfWork.EmailQueue.GetEmailSMTPInfo();
+                string toEmail = string.Empty;
+                string subjectEmail = string.Empty;
+                var user = await _userManager.FindByNameAsync("amitverma"); // to be replaced with dynamic value 
+                if (user != null)
+                    toEmail = user.Email;
+                string emailBody = string.Empty;
+                if (emailTemplate != null)
+                {
+                    emailBody = emailTemplate.Template;
+                    emailBody = emailBody.Replace("#Supplier", result.Name);
+                    emailBody = emailBody.Replace("#User", user != null ? user.UserName : string.Empty);
+                    subjectEmail = emailTemplate.EmailSubject;
+                }
+
+                if (emailHeaderFooter != null)
+                    emailBody = emailHeaderFooter.TemplateHeader + emailBody + emailHeaderFooter.TemplateFooter;
+
+                entity.EmailFrom = emailSetting != null ? emailSetting.SMPTUserName : toEmail;
+                entity.EmailTo = toEmail;
+                entity.EmailBody = emailBody;
+                entity.EmailSubject = subjectEmail;
+                await _unitOfWork.EmailQueue.AddAsync(entity);
+
+                EmailUtility.SendEmail(emailSetting, entity);
+
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+            finally
+            {
+                if (entity != null)
+                {
+                    entity.IsSent = true;
+                    await _unitOfWork.EmailQueue.Update(entity);
+                }
+
+            }
         }
     }
 }

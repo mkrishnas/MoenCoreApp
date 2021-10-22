@@ -32,6 +32,10 @@ namespace Models.Models
         public virtual DbSet<UserDetails> UserDetails { get; set; } //
         public virtual DbSet<ProductMetaDataDTO> ProductMetaDataDTOs { get; set; }
         public virtual DbSet<User> Users { get; set; }
+        public virtual DbSet<EmailTemplate> EmailTemplates { get; set; }
+        public virtual DbSet<EmailQueue> EmailQueue { get; set; }
+        public virtual DbSet<EmailHeaderFooter> EmailHeaderFooter { get; set; }
+        public virtual DbSet<EmailSMTPInfo> EmailSMTPInfo { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
